@@ -20,7 +20,7 @@ export default function Home() {
 
   const dataLoadedRef = useRef(false);
 
-  const switchTurns = () => {
+  const switchTurns = (newPlayers) => {
     setCurrentPlayer(
       currentPlayer + 1 < players.length ? currentPlayer + 1 : 0
     );
@@ -43,7 +43,7 @@ export default function Home() {
 
     let total = 0;
 
-    players.forEach((pl) => {
+    newPlayers.forEach((pl) => {
       total += pl.score;
     });
 
@@ -202,36 +202,36 @@ export default function Home() {
                       }
                     }
 
+                    let newPlayers = players;
+
                     if (win) {
-                      setPlayers(
-                        players.map((player, i) => {
-                          if (i !== currentPlayer) {
-                            return player;
-                          }
+                      newPlayers = players.map((player, i) => {
+                        if (i !== currentPlayer) {
+                          return player;
+                        }
 
-                          return {
-                            ...player,
-                            sets: [...player.sets, counter],
-                            score: player.score + currentCounter * 2,
-                          };
-                        })
-                      );
+                        return {
+                          ...player,
+                          sets: [...player.sets, counter],
+                          score: player.score + currentCounter * 2,
+                        };
+                      });
                     } else {
-                      setPlayers(
-                        players.map((player, i) => {
-                          if (i !== currentPlayer) {
-                            return player;
-                          }
+                      newPlayers = players.map((player, i) => {
+                        if (i !== currentPlayer) {
+                          return player;
+                        }
 
-                          return {
-                            ...player,
-                            sets: [...player.sets, counter],
-                          };
-                        })
-                      );
+                        return {
+                          ...player,
+                          sets: [...player.sets, counter],
+                        };
+                      });
                     }
 
-                    switchTurns();
+                    setPlayers(newPlayers);
+
+                    switchTurns(newPlayers);
                   }}
                 >
                   Ok
@@ -300,21 +300,21 @@ export default function Home() {
                         }
                       }
 
-                      setPlayers(
-                        players.map((player, i) => {
-                          if (i !== currentPlayer) {
-                            return player;
-                          }
+                      const newPlayers = players.map((player, i) => {
+                        if (i !== currentPlayer) {
+                          return player;
+                        }
 
-                          return {
-                            ...player,
-                            sets: [...player.sets, counter],
-                            score: player.score + currentCounter,
-                          };
-                        })
-                      );
+                        return {
+                          ...player,
+                          sets: [...player.sets, counter],
+                          score: player.score + currentCounter,
+                        };
+                      });
 
-                      switchTurns();
+                      setPlayers(newPlayers);
+
+                      switchTurns(newPlayers);
                     }}
                   >
                     No
