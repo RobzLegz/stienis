@@ -16,7 +16,7 @@ export default function Home() {
   const [win, setWin] = useState(null);
   const [minCredit, setMinCredit] = useState(null);
   const [is300, setIs300] = useState(0);
-  const [currentGirl, setCurrentGirl] = useState(getRandomNumber(1, 12));
+  const [currentGirl, setCurrentGirl] = useState(getRandomNumber(1, 9));
 
   const dataLoadedRef = useRef(false);
 
@@ -33,10 +33,10 @@ export default function Home() {
     setTimerRef(3);
     setWin(null);
 
-    let nextGirl = getRandomNumber(1, 12);
+    let nextGirl = getRandomNumber(1, 9);
 
     while (nextGirl === currentGirl) {
-      nextGirl = getRandomNumber(1, 12);
+      nextGirl = getRandomNumber(1, 9);
     }
 
     setCurrentGirl(nextGirl);
