@@ -143,16 +143,18 @@ export default function Home() {
         <div className="absolute top-0 left-0 flex h-full flex-col items-center justify-center w-full bg-black/40">
           <strong className="text-6xl text-white mb-4">300</strong>
 
-          {players.map((player, i) => (
-            <div
-              className="flex w-full p-4 border-b items-center justify-between text-white"
-              key={i}
-            >
-              <strong>{player.name}</strong>
+          {players
+            .sort((a, b) => b.score - a.score)
+            .map((player, i) => (
+              <div
+                className="flex w-full p-4 border-b items-center justify-between text-white"
+                key={i}
+              >
+                <strong>{player.name}</strong>
 
-              <strong>{player.score}</strong>
-            </div>
-          ))}
+                <strong>{player.score}</strong>
+              </div>
+            ))}
         </div>
       </PageModule>
     );
@@ -263,13 +265,14 @@ export default function Home() {
             {!setFinished ? (
               <div className="flex gap-2 mt-4">
                 <button
-                  className="w-20 h-20 rounded-md bg-red-500 text-4xl opacity-90 text-white"
+                  className="w-20 h-20 rounded-md bg-red-500 text-4xl opacity-80 text-white"
                   onClick={() => setCounter(counter - 1)}
+                  disabled={counter === 0}
                 >
                   -
                 </button>
                 <button
-                  className="w-20 h-20 rounded-md bg-red-500 text-4xl opacity-90 text-white"
+                  className="w-20 h-20 rounded-md bg-red-500 text-4xl opacity-80 text-white"
                   onClick={() => setCounter(counter + 1)}
                 >
                   +
