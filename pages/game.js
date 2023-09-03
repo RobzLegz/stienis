@@ -40,6 +40,18 @@ export default function Home() {
     }
 
     setCurrentGirl(nextGirl);
+
+    let total = 0;
+
+    players.forEach((pl) => {
+      total += pl.score;
+    });
+
+    setIs300(total);
+
+    if (total >= 300) {
+      localStorage.removeItem("data");
+    }
   };
 
   useEffect(() => {
@@ -107,20 +119,6 @@ export default function Home() {
       }
     }
   }, [gambling, timerRef]);
-
-  useEffect(() => {
-    let total = 0;
-
-    players.forEach((pl) => {
-      total += pl.score;
-    });
-
-    setIs300(total);
-
-    if (total >= 300) {
-      localStorage.removeItem("data");
-    }
-  }, [players]);
 
   const CurrentBG = () => {
     return (
