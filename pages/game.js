@@ -1,14 +1,7 @@
-import Head from "next/head";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import PageModule from "../src/modules/PageModule";
-
-function generateRandomNumber() {
-  const randomDecimal = Math.random();
-  const randomNumber = Math.floor(randomDecimal * 2) + 1;
-
-  return randomNumber;
-}
+import { getRandomNumber } from "../src/utils/generateRandomBetween";
 
 export default function Home() {
   const [players, setPlayers] = useState([]);
@@ -81,7 +74,7 @@ export default function Home() {
   useEffect(() => {
     if (gambling) {
       if (timerRef === 0) {
-        const random = generateRandomNumber();
+        const random = getRandomNumber(1, 2);
 
         setWin(random === 2);
       } else {
