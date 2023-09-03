@@ -16,8 +16,31 @@ export default function Home() {
   const [win, setWin] = useState(null);
   const [minCredit, setMinCredit] = useState(null);
   const [is300, setIs300] = useState(0);
+  const [currentGirl, setCurrentGirl] = useState(getRandomNumber(1, 12));
 
   const dataLoadedRef = useRef(false);
+
+  const switchTurns = () => {
+    setCurrentPlayer(
+      currentPlayer + 1 < players.length ? currentPlayer + 1 : 0
+    );
+
+    setGambling(false);
+    setMinCredit(null);
+    setSetFinished(false);
+    setTakingCredit(false);
+    setCounter(0);
+    setTimerRef(3);
+    setWin(null);
+
+    let nextGirl = getRandomNumber(1, 12);
+
+    while (nextGirl === currentGirl) {
+      nextGirl = getRandomNumber(1, 12);
+    }
+
+    setCurrentGirl(nextGirl);
+  };
 
   useEffect(() => {
     if (!dataLoadedRef.current) {
@@ -99,19 +122,25 @@ export default function Home() {
     }
   }, [players]);
 
+  const CurrentBG = () => {
+    return (
+      <Image
+        src={`/resources/${currentGirl}.jpg`}
+        alt="Anime girl"
+        width={400}
+        height={800}
+        className="w-full h-full object-cover"
+      />
+    );
+  };
+
   if (is300 >= 300) {
     return (
       <PageModule
         title="300"
         className="w-full h-screen flex flex-col items-start justify-start"
       >
-        <Image
-          src="/home.jpg"
-          alt="Anime girl"
-          width={400}
-          height={800}
-          className="w-full h-full object-cover"
-        />
+        <CurrentBG />
 
         <div className="absolute top-0 left-0 flex h-full flex-col items-center justify-center w-full bg-black/40">
           <strong className="text-6xl text-white mb-4">300</strong>
@@ -137,13 +166,7 @@ export default function Home() {
         title="300"
         className="w-full h-screen flex flex-col items-start justify-start"
       >
-        <Image
-          src="/home.jpg"
-          alt="Anime girl"
-          width={400}
-          height={800}
-          className="w-full h-full object-cover"
-        />
+        <CurrentBG />
 
         <div className="absolute top-0 left-0 flex h-full flex-col items-center justify-center w-full bg-black/40">
           <div className="flex w-full items-center justify-center p-2 border-b">
@@ -193,20 +216,22 @@ export default function Home() {
                           };
                         })
                       );
+                    } else {
+                      setPlayers(
+                        players.map((player, i) => {
+                          if (i !== currentPlayer) {
+                            return player;
+                          }
+
+                          return {
+                            ...player,
+                            sets: [...player.sets, counter],
+                          };
+                        })
+                      );
                     }
 
-                    setGambling(false);
-
-                    setCurrentPlayer(
-                      currentPlayer + 1 < players.length ? currentPlayer + 1 : 0
-                    );
-
-                    setMinCredit(null);
-                    setSetFinished(false);
-                    setTakingCredit(false);
-                    setCounter(0);
-                    setTimerRef(3);
-                    setWin(null);
+                    switchTurns();
                   }}
                 >
                   Ok
@@ -225,13 +250,7 @@ export default function Home() {
         title="300"
         className="w-full h-screen flex flex-col items-start justify-start"
       >
-        <Image
-          src="/home.jpg"
-          alt="Anime girl"
-          width={400}
-          height={800}
-          className="w-full h-full object-cover"
-        />
+        <CurrentBG />
 
         <div className="absolute top-0 left-0 flex h-full flex-col items-center justify-center w-full bg-black/40">
           <div className="flex w-full items-center justify-center p-2 border-b">
@@ -294,20 +313,7 @@ export default function Home() {
                         })
                       );
 
-                      setGambling(false);
-
-                      setCurrentPlayer(
-                        currentPlayer + 1 < players.length
-                          ? currentPlayer + 1
-                          : 0
-                      );
-
-                      setTakingCredit(false);
-                      setMinCredit(null);
-                      setSetFinished(false);
-                      setCounter(0);
-                      setTimerRef(3);
-                      setWin(null);
+                      switchTurns();
                     }}
                   >
                     No
@@ -382,13 +388,7 @@ export default function Home() {
       title="300"
       className="w-full h-screen flex flex-col items-start justify-start"
     >
-      <Image
-        src="/home.jpg"
-        alt="Anime girl"
-        width={400}
-        height={800}
-        className="w-full h-full object-cover"
-      />
+      <CurrentBG />
 
       <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center bg-black/40">
         <div className="flex flex-col">
