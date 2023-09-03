@@ -307,15 +307,27 @@ export default function Home() {
                   setMinCredit(
                     players[currentPlayer].sets[
                       players[currentPlayer].sets.length - 1
-                    ] - 1
+                    ] -
+                      1 >
+                      6
+                      ? players[currentPlayer].sets[
+                          players[currentPlayer].sets.length - 1
+                        ] - 1
+                      : 6
                   );
                 }}
-                disabled={counter > 0}
+                disabled={counter > 0 && !takingCredit}
               >
                 Credit{" "}
                 {players[currentPlayer].sets[
                   players[currentPlayer].sets.length - 1
-                ] - 1}
+                ] -
+                  1 >
+                6
+                  ? players[currentPlayer].sets[
+                      players[currentPlayer].sets.length - 1
+                    ] - 1
+                  : 6}
               </button>
             )}
 
