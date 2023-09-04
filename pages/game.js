@@ -72,6 +72,10 @@ export default function Home() {
         setWin(parsedData.win);
         setMinCredit(parsedData.minCredit);
         setIs300(parsedData.is300);
+
+        if (parsedData.is300 >= 300) {
+          localStorage.removeItem("data");
+        }
       }
     }
   }, []);
