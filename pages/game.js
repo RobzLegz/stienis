@@ -61,20 +61,21 @@ export default function Home() {
       const data = localStorage.getItem("data");
       if (data) {
         const parsedData = JSON.parse(data);
-        setPlayers(parsedData.players);
-        setGameStarted(parsedData.gameStarted);
-        setTakingCredit(parsedData.takingCredit);
-        setSetFinished(parsedData.setFinished);
-        setCounter(parsedData.counter);
-        setGambling(parsedData.gambling);
-        setCurrentPlayer(parsedData.currentPlayer);
-        setTimerRef(parsedData.timerRef);
-        setWin(parsedData.win);
-        setMinCredit(parsedData.minCredit);
-        setIs300(parsedData.is300);
 
         if (parsedData.is300 >= 300) {
           localStorage.removeItem("data");
+        } else {
+          setPlayers(parsedData.players);
+          setGameStarted(parsedData.gameStarted);
+          setTakingCredit(parsedData.takingCredit);
+          setSetFinished(parsedData.setFinished);
+          setCounter(parsedData.counter);
+          setGambling(parsedData.gambling);
+          setCurrentPlayer(parsedData.currentPlayer);
+          setTimerRef(parsedData.timerRef);
+          setWin(parsedData.win);
+          setMinCredit(parsedData.minCredit);
+          setIs300(parsedData.is300);
         }
       }
     }
