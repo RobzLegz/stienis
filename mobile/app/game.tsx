@@ -107,37 +107,41 @@ export default function GameScreen() {
           </View>
         </View>
 
-        <Pressable
-          accessibilityHint="Shows all player scores"
-          accessibilityLabel="Group score"
-          accessibilityRole="button"
-          onPress={toggleScoreboard}
-          style={({ pressed }) => [styles.scorePanel, pressed && styles.pressed]}>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Group</Text>
-            <View style={styles.totalValueRow}>
-              <Text style={styles.totalValue}>
-                {state.combinedTotal}/{TARGET_SCORE}
-              </Text>
-              <Entypo color="#aab6c5" name={isScoreboardOpen ? 'chevron-up' : 'chevron-down'} size={18} />
+        <View style={styles.scorePanelContainer}>
+          <Pressable
+            accessibilityHint="Shows all player scores"
+            accessibilityLabel="Group score"
+            accessibilityRole="button"
+            onPress={toggleScoreboard}
+            style={({ pressed }) => [styles.scorePanel, pressed && styles.pressed]}>
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>Group</Text>
+              <View style={styles.totalValueRow}>
+                <Text style={styles.totalValue}>
+                  {state.combinedTotal}/{TARGET_SCORE}
+                </Text>
+                <Entypo color="#aab6c5" name={isScoreboardOpen ? 'chevron-up' : 'chevron-down'} size={18} />
+              </View>
             </View>
-          </View>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${progress}%` }]} />
-          </View>
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: `${progress}%` }]} />
+            </View>
+          </Pressable>
           {isScoreboardOpen && (
-            <View style={styles.scoreboardPanel}>
-              {state.players.map((player) => (
-                <View key={player.id} style={styles.scoreboardRow}>
-                  <Text numberOfLines={1} style={styles.scoreboardName}>
-                    {player.name}
-                  </Text>
-                  <Text style={styles.scoreboardValue}>{player.score}</Text>
-                </View>
-              ))}
+            <View style={styles.scoreboardDropdown}>
+              <View style={styles.scoreboardPanel}>
+                {state.players.map((player) => (
+                  <View key={player.id} style={styles.scoreboardRow}>
+                    <Text numberOfLines={1} style={styles.scoreboardName}>
+                      {player.name}
+                    </Text>
+                    <Text style={styles.scoreboardValue}>{player.score}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
           )}
-        </Pressable>
+        </View>
         {state.lastTurnMessage && (
           <Text numberOfLines={1} style={styles.lastTurn}>
             {state.lastTurnMessage}
@@ -149,81 +153,83 @@ export default function GameScreen() {
           <Text style={styles.counter}>{finishedSetValue}</Text>
         </View>
 
-        {isChoosing && (
-          <View style={styles.prompt}>
-            <Text style={styles.promptTitle}></Text>
-            <View style={styles.promptRow}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={bankSet}
-                style={({ pressed }) => [styles.choiceButton, styles.primaryButton, pressed && styles.pressed]}>
-                <Text style={styles.primaryButtonText}>Bank</Text>
-              </Pressable>
-              <Pressable accessibilityRole="button" onPress={gambleSet} style={({ pressed }) => [styles.gambleButton, pressed && styles.pressed]}>
-                <Text style={styles.gambleButtonText}>50/50 double</Text>
+        <View style={styles.bottomSection}>
+          {isChoosing && (
+            <View style={styles.prompt}>
+              <Text style={styles.promptTitle}></Text>
+              <View style={styles.promptRow}>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={bankSet}
+                  style={({ pressed }) => [styles.choiceButton, styles.primaryButton, pressed && styles.pressed]}>
+                  <Text style={styles.primaryButtonText}>Bank</Text>
+                </Pressable>
+                <Pressable accessibilityRole="button" onPress={gambleSet} style={({ pressed }) => [styles.gambleButton, pressed && styles.pressed]}>
+                  <Text style={styles.gambleButtonText}>50/50 double</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
+
+          {isGambling && (
+            <View style={styles.prompt}>
+              <Text style={styles.eyebrow}>Coinflip</Text>
+              <Text style={styles.countdown}>{state.gambleCountdown}</Text>
+              <Text style={styles.promptSubtext}>Double or nothing...</Text>
+            </View>
+          )}
+
+          {isGambleResolved && (
+            <View style={styles.prompt}>
+              <Text style={styles.eyebrow}>Double or nothing</Text>
+              <Text style={[styles.resultTitle, state.gambleResult === 'win' ? styles.winText : styles.loseText]}>
+                {state.gambleResult === 'win' ? 'Double' : 'Nothing'}
+              </Text>
+              <Text style={styles.promptSubtext}>
+                {state.gambleResult === 'win' ? `${finishedSetValue * 2} reps scored.` : '0 reps scored.'}
+              </Text>
+              <Pressable accessibilityRole="button" onPress={continueAfterGamble} style={({ pressed }) => [styles.primaryButton, styles.continueButton, pressed && styles.pressed]}>
+                <Text style={styles.primaryButtonText}>Continue</Text>
               </Pressable>
             </View>
-          </View>
-        )}
+          )}
 
-        {isGambling && (
-          <View style={styles.prompt}>
-            <Text style={styles.eyebrow}>Coinflip</Text>
-            <Text style={styles.countdown}>{state.gambleCountdown}</Text>
-            <Text style={styles.promptSubtext}>Double or nothing...</Text>
-          </View>
-        )}
+          {isTallying && (
+            <View style={styles.tallySection}>
+              <View style={styles.tallyRow}>
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={state.currentCounter === 0}
+                  onPress={decrementCounter}
+                  style={({ pressed }) => [
+                    styles.tallyButton,
+                    styles.minusButton,
+                    state.currentCounter === 0 && styles.disabledButton,
+                    pressed && styles.pressed,
+                  ]}>
+                  <Text style={styles.tallyButtonText}>-</Text>
+                </Pressable>
+                <Pressable accessibilityRole="button" onPress={incrementCounter} style={({ pressed }) => [styles.tallyButton, styles.plusButton, pressed && styles.pressed]}>
+                  <Text style={styles.tallyButtonText}>+</Text>
+                </Pressable>
+              </View>
 
-        {isGambleResolved && (
-          <View style={styles.prompt}>
-            <Text style={styles.eyebrow}>Double or nothing</Text>
-            <Text style={[styles.resultTitle, state.gambleResult === 'win' ? styles.winText : styles.loseText]}>
-              {state.gambleResult === 'win' ? 'Double' : 'Nothing'}
-            </Text>
-            <Text style={styles.promptSubtext}>
-              {state.gambleResult === 'win' ? `${finishedSetValue * 2} reps scored.` : '0 reps scored.'}
-            </Text>
-            <Pressable accessibilityRole="button" onPress={continueAfterGamble} style={({ pressed }) => [styles.primaryButton, styles.continueButton, pressed && styles.pressed]}>
-              <Text style={styles.primaryButtonText}>Continue</Text>
-            </Pressable>
-          </View>
-        )}
-
-        {isTallying && (
-          <View style={styles.tallySection}>
-            <View style={styles.tallyRow}>
-              <Pressable
-                accessibilityRole="button"
-                disabled={state.currentCounter === 0}
-                onPress={decrementCounter}
-                style={({ pressed }) => [
-                  styles.tallyButton,
-                  styles.minusButton,
-                  state.currentCounter === 0 && styles.disabledButton,
-                  pressed && styles.pressed,
-                ]}>
-                <Text style={styles.tallyButtonText}>-</Text>
-              </Pressable>
-              <Pressable accessibilityRole="button" onPress={incrementCounter} style={({ pressed }) => [styles.tallyButton, styles.plusButton, pressed && styles.pressed]}>
-                <Text style={styles.tallyButtonText}>+</Text>
-              </Pressable>
+              <View style={styles.actions}>
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={state.currentCounter === 0}
+                  onPress={finishSet}
+                  style={({ pressed }) => [
+                    styles.finishButton,
+                    state.currentCounter === 0 && styles.disabledButton,
+                    pressed && styles.pressed,
+                  ]}>
+                  <Text style={styles.finishButtonText}>Finish Set</Text>
+                </Pressable>
+              </View>
             </View>
-
-            <View style={styles.actions}>
-              <Pressable
-                accessibilityRole="button"
-                disabled={state.currentCounter === 0}
-                onPress={finishSet}
-                style={({ pressed }) => [
-                  styles.finishButton,
-                  state.currentCounter === 0 && styles.disabledButton,
-                  pressed && styles.pressed,
-                ]}>
-                <Text style={styles.finishButtonText}>Finish Set</Text>
-              </Pressable>
-            </View>
-          </View>
-        )}
+          )}
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -285,8 +291,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
+  scorePanelContainer: {
+    position: 'relative',
+    zIndex: 20,
+  },
+  scoreboardDropdown: {
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: '100%',
+    zIndex: 30,
+  },
   scoreboardPanel: {
+    backgroundColor: '#101722',
+    borderColor: '#334155',
+    borderRadius: 18,
+    borderWidth: 1,
     marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   scoreboardRow: {
     alignItems: 'center',
@@ -308,6 +331,7 @@ const styles = StyleSheet.create({
   },
   menuAnchor: {
     position: 'relative',
+    zIndex: 50,
   },
   menuButton: {
     alignItems: 'center',
@@ -328,7 +352,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: 42,
-    zIndex: 10,
+    zIndex: 60,
   },
   menuItem: {
     borderRadius: 12,
@@ -392,6 +416,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 220,
   },
+  bottomSection: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
   counterLabel: {
     color: '#66e3a6',
     fontSize: 18,
@@ -447,9 +475,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   tallySection: {
-    flex: 1,
     gap: 18,
-    justifyContent: 'space-between',
   },
   tallyButton: {
     alignItems: 'center',
