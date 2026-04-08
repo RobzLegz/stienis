@@ -1,4 +1,6 @@
+import { Entypo } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -6,6 +8,8 @@ import { TARGET_SCORE } from '@/constants/game';
 import { useGame } from '@/context/game-context';
 
 export default function GameScreen() {
+  const [isOverflowMenuOpen, setIsOverflowMenuOpen] = useState(false);
+  const [isScoreboardOpen, setIsScoreboardOpen] = useState(false);
   const {
     bankSet,
     continueAfterGamble,
@@ -44,10 +48,21 @@ export default function GameScreen() {
   }
 
   const confirmEndGame = () => {
+    setIsOverflowMenuOpen(false);
     Alert.alert('End game early?', 'This will finish the game and show the current leaderboard.', [
       { text: 'Keep Playing', style: 'cancel' },
       { text: 'End Game', style: 'destructive', onPress: endGameEarly },
     ]);
+  };
+
+  const handleSkipTurn = () => {
+    setIsOverflowMenuOpen(false);
+    skipTurn();
+  };
+
+  const toggleScoreboard = () => {
+    setIsOverflowMenuOpen(false);
+    setIsScoreboardOpen((current) => !current);
   };
 
   const isTallying = state.phase === 'tally';
@@ -67,21 +82,62 @@ export default function GameScreen() {
               {currentPlayer.name}
             </Text>
           </View>
-          <View style={styles.scoreBlock}>
-            <Text style={styles.scoreLabel}>Score</Text>
-            <Text style={styles.scoreValue}>{currentPlayer.score}</Text>
+          <View style={styles.headerActions}>
+            <View style={styles.menuAnchor}>
+              <Pressable
+                accessibilityHint="Opens more actions for the current turn"
+                accessibilityLabel="More actions"
+                accessibilityRole="button"
+                onPress={() => setIsOverflowMenuOpen((current) => !current)}
+                style={({ pressed }) => [styles.menuButton, pressed && styles.pressed]}>
+                <Entypo color="#f8fafc" name="dots-three-vertical" size={18} />
+              </Pressable>
+              {isOverflowMenuOpen && (
+                <View style={styles.overflowMenu}>
+                  <Pressable accessibilityRole="button" onPress={handleSkipTurn} style={({ pressed }) => [styles.menuItem, pressed && styles.pressed]}>
+                    <Text style={styles.menuItemText}>Skip</Text>
+                  </Pressable>
+                  <View style={styles.menuDivider} />
+                  <Pressable accessibilityRole="button" onPress={confirmEndGame} style={({ pressed }) => [styles.menuItem, pressed && styles.pressed]}>
+                    <Text style={[styles.menuItemText, styles.menuItemDanger]}>End</Text>
+                  </Pressable>
+                </View>
+              )}
+            </View>
           </View>
         </View>
 
-        <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Group</Text>
-          <Text style={styles.totalValue}>
-            {state.combinedTotal}/{TARGET_SCORE}
-          </Text>
-        </View>
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${progress}%` }]} />
-        </View>
+        <Pressable
+          accessibilityHint="Shows all player scores"
+          accessibilityLabel="Group score"
+          accessibilityRole="button"
+          onPress={toggleScoreboard}
+          style={({ pressed }) => [styles.scorePanel, pressed && styles.pressed]}>
+          <View style={styles.totalRow}>
+            <Text style={styles.totalLabel}>Group</Text>
+            <View style={styles.totalValueRow}>
+              <Text style={styles.totalValue}>
+                {state.combinedTotal}/{TARGET_SCORE}
+              </Text>
+              <Entypo color="#aab6c5" name={isScoreboardOpen ? 'chevron-up' : 'chevron-down'} size={18} />
+            </View>
+          </View>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: `${progress}%` }]} />
+          </View>
+          {isScoreboardOpen && (
+            <View style={styles.scoreboardPanel}>
+              {state.players.map((player) => (
+                <View key={player.id} style={styles.scoreboardRow}>
+                  <Text numberOfLines={1} style={styles.scoreboardName}>
+                    {player.name}
+                  </Text>
+                  <Text style={styles.scoreboardValue}>{player.score}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </Pressable>
         {state.lastTurnMessage && (
           <Text numberOfLines={1} style={styles.lastTurn}>
             {state.lastTurnMessage}
@@ -95,7 +151,7 @@ export default function GameScreen() {
 
         {isChoosing && (
           <View style={styles.prompt}>
-            <Text style={styles.promptTitle}>{finishedSetValue} reps finished</Text>
+            <Text style={styles.promptTitle}></Text>
             <View style={styles.promptRow}>
               <Pressable
                 accessibilityRole="button"
@@ -104,7 +160,7 @@ export default function GameScreen() {
                 <Text style={styles.primaryButtonText}>Bank</Text>
               </Pressable>
               <Pressable accessibilityRole="button" onPress={gambleSet} style={({ pressed }) => [styles.gambleButton, pressed && styles.pressed]}>
-                <Text style={styles.gambleButtonText}>Gamble</Text>
+                <Text style={styles.gambleButtonText}>50/50 double</Text>
               </Pressable>
             </View>
           </View>
@@ -112,7 +168,7 @@ export default function GameScreen() {
 
         {isGambling && (
           <View style={styles.prompt}>
-            <Text style={styles.eyebrow}>Gambling</Text>
+            <Text style={styles.eyebrow}>Coinflip</Text>
             <Text style={styles.countdown}>{state.gambleCountdown}</Text>
             <Text style={styles.promptSubtext}>Double or nothing...</Text>
           </View>
@@ -134,7 +190,7 @@ export default function GameScreen() {
         )}
 
         {isTallying && (
-          <>
+          <View style={styles.tallySection}>
             <View style={styles.tallyRow}>
               <Pressable
                 accessibilityRole="button"
@@ -165,16 +221,8 @@ export default function GameScreen() {
                 ]}>
                 <Text style={styles.finishButtonText}>Finish Set</Text>
               </Pressable>
-              <View style={styles.secondaryRow}>
-                <Pressable accessibilityRole="button" onPress={skipTurn} style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}>
-                  <Text style={styles.secondaryButtonText}>Skip</Text>
-                </Pressable>
-                <Pressable accessibilityRole="button" onPress={confirmEndGame} style={({ pressed }) => [styles.endButton, pressed && styles.pressed]}>
-                  <Text style={styles.endButtonText}>End</Text>
-                </Pressable>
-              </View>
             </View>
-          </>
+          </View>
         )}
       </View>
     </SafeAreaView>
@@ -204,6 +252,11 @@ const styles = StyleSheet.create({
     gap: 16,
     justifyContent: 'space-between',
   },
+  headerActions: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    gap: 10,
+  },
   playerBlock: {
     flex: 1,
   },
@@ -224,19 +277,77 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '800',
   },
-  scoreBlock: {
-    alignItems: 'flex-end',
+  scorePanel: {
+    backgroundColor: '#101722',
+    borderColor: '#334155',
+    borderRadius: 18,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
-  scoreLabel: {
-    color: '#7c8a9a',
-    fontSize: 12,
-    fontWeight: '900',
-    textTransform: 'uppercase',
+  scoreboardPanel: {
+    marginTop: 10,
   },
-  scoreValue: {
+  scoreboardRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    minHeight: 30,
+  },
+  scoreboardName: {
+    color: '#aab6c5',
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '700',
+    paddingRight: 12,
+  },
+  scoreboardValue: {
     color: '#f8fafc',
-    fontSize: 30,
+    fontSize: 15,
     fontWeight: '900',
+  },
+  menuAnchor: {
+    position: 'relative',
+  },
+  menuButton: {
+    alignItems: 'center',
+    backgroundColor: '#182332',
+    borderRadius: 16,
+    height: 36,
+    justifyContent: 'center',
+    marginTop: 2,
+    width: 36,
+  },
+  overflowMenu: {
+    backgroundColor: '#182332',
+    borderColor: '#273344',
+    borderRadius: 16,
+    borderWidth: 1,
+    minWidth: 132,
+    padding: 6,
+    position: 'absolute',
+    right: 0,
+    top: 42,
+    zIndex: 10,
+  },
+  menuItem: {
+    borderRadius: 12,
+    minHeight: 42,
+    justifyContent: 'center',
+    paddingHorizontal: 14,
+  },
+  menuItemText: {
+    color: '#f8fafc',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  menuItemDanger: {
+    color: '#ff8a8a',
+  },
+  menuDivider: {
+    backgroundColor: '#273344',
+    height: 1,
+    marginVertical: 4,
   },
   totalRow: {
     alignItems: 'center',
@@ -248,6 +359,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '800',
   },
+  totalValueRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
   totalValue: {
     color: '#f8fafc',
     fontSize: 18,
@@ -257,6 +373,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#273344',
     borderRadius: 999,
     height: 10,
+    marginTop: 10,
     overflow: 'hidden',
   },
   progressFill: {
@@ -295,9 +412,7 @@ const styles = StyleSheet.create({
     minHeight: 88,
   },
   promptTitle: {
-    color: '#f8fafc',
     fontSize: 20,
-    fontWeight: '900',
   },
   promptRow: {
     flexDirection: 'row',
@@ -330,6 +445,11 @@ const styles = StyleSheet.create({
   tallyRow: {
     flexDirection: 'row',
     gap: 14,
+  },
+  tallySection: {
+    flex: 1,
+    gap: 18,
+    justifyContent: 'space-between',
   },
   tallyButton: {
     alignItems: 'center',
@@ -364,10 +484,6 @@ const styles = StyleSheet.create({
     fontSize: 19,
     fontWeight: '900',
   },
-  secondaryRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
   primaryButton: {
     alignItems: 'center',
     backgroundColor: '#66e3a6',
@@ -400,33 +516,6 @@ const styles = StyleSheet.create({
   },
   continueButton: {
     alignSelf: 'stretch',
-  },
-  secondaryButton: {
-    alignItems: 'center',
-    backgroundColor: '#223047',
-    borderRadius: 18,
-    flex: 1,
-    minHeight: 52,
-    justifyContent: 'center',
-  },
-  secondaryButtonText: {
-    color: '#f8fafc',
-    fontSize: 17,
-    fontWeight: '900',
-  },
-  endButton: {
-    alignItems: 'center',
-    borderColor: '#63333a',
-    borderRadius: 18,
-    borderWidth: 1,
-    flex: 1,
-    minHeight: 52,
-    justifyContent: 'center',
-  },
-  endButtonText: {
-    color: '#ff8a8a',
-    fontSize: 17,
-    fontWeight: '900',
   },
   disabledButton: {
     opacity: 0.45,
